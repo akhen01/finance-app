@@ -1,0 +1,27 @@
+{% extends 'PersonalF/base.html'%}
+
+{% block body%}
+<h1>Personal Finance</h1>
+    <div>List the type of incomes you have for example ,bussines, salary etc.. 
+        <form action="{% url 'income'%}" method="post">
+            {% csrf_token%}
+            {{ income }}
+            <input type="submit">
+        </form>
+    </div>
+    <div>
+        <ul>
+            {% for inc in inlist %}
+            <li>
+                {{ inc.name }}
+            </li>
+            <li>
+                <a href="{% url 'idelete' inc.id  %}">Delete</a>
+            </li>
+            {% empty %}
+            <li>no income</li>
+            {% endfor%}
+        </ul>
+    </div>
+<div><a href="{% url 'budget'%}">Done</a></div>
+{% endblock %}

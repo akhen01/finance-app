@@ -1,0 +1,59 @@
+{% extends 'PersonalF/base.html'%}
+
+{% block body%}
+<h1>Personal Finance</h1>
+<div>List the details of incomes you have
+    <form action="{% url 'details'%}" method="post">
+        {% csrf_token %}
+        {{ income }}
+        <input type="submit" name="income">
+
+    </form>
+</div>
+
+<div>List the details of expences you have
+    <form action="{% url 'details' %}" method="post">
+        {% csrf_token %}
+        {{budget}}
+        <input type="submit" name="budjet">
+
+    </form>
+    <div>
+        <ul>
+            {% for Dinc in allincomes %}
+            <li>
+                {{Dinc.Itype}}
+                {{Dinc.amount}}
+            </li>
+            <li>
+                <a href="{%url 'didelete' Dinc.id %}">Delete</a>
+            </li>
+            {% empty %}
+            <li>
+                No Income
+            </li>
+            {% endfor %}
+        </ul>  
+    </div>
+    <div>
+        <ul>
+            {% for Dbud in allbudgets %}
+            <li>
+                {{Dbud.Itype}}
+                {{Dbud.amount}}
+            </li>
+            <li>
+                <a href="{% url 'dbdelete' Dbud.id %}">Delete</a>
+            </li>
+            {% empty %}
+            <li>
+                No Budgets
+            </li>
+            {% endfor %}
+        </ul> 
+    </div>
+</div>
+<div>
+    <a href="{% url 'status' %}">Financial Status</a>
+</div>
+{% endblock %}

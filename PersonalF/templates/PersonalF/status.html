@@ -1,0 +1,48 @@
+{% extends 'PersonalF/base.html'%}
+
+{% block body%}
+<h1>Financial status</h1>
+<h2>MY Incomes</h2>
+<ul>
+    {% for Dinc in allincomes %}
+    <h3>{{Dinc.Itype}}</h3>
+    <li>
+        {{Dinc.amount}}
+    </li>
+    {% empty %}
+    <li>
+        No Income
+    </li>
+    {% endfor %}
+</ul>
+<h3>Total Income : {{Totalincome}}</h3>  
+
+<h2>My Budgets</h2>
+<ul>
+    {% for Dbud in allbudgets %}
+    <h3>{{Dbud.Itype}}</h3>
+    <li>
+        {{Dbud.amount}}
+        <ul>
+            <li>
+                <h4>Expences so far</h4>
+            </li>            
+            
+        </ul>
+    </li>
+    {% empty %}
+    <li>
+        No Budgets
+    </li>
+    {% endfor %}
+    <li>{{Alist}}</li>
+    <ul>
+        {% for key, value in Alist.items %}
+        <li>{{key}} - {{value}}</li>
+        {% endfor %}
+        <li>{{L}}</li>
+    </ul>
+    
+</ul>
+<a href="{% url 'expence' %} ">Insert Expence</a>
+{% endblock %}

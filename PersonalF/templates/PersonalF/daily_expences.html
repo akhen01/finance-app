@@ -1,0 +1,23 @@
+{% extends "PersonalF/base.html" %}
+<h1>Daily expences</h1>
+
+{% block body %}
+<h1>Todays Expences</h1>
+<div>
+    <form action="{% url 'expence' %}" method="post">
+        {% csrf_token %}
+        {{ Eform }}
+        <input type="submit">
+    </form>
+
+    <ul>
+        {% for i in allExpences %}
+        <li>
+            for {{i.Itype}}, ${{i.amount}}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+<a href="{% url 'status' %} ">See Status</a>
+   
+{% endblock %}
