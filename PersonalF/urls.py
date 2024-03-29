@@ -3,14 +3,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.index, name="home"),
-    path('income/', views.income_setup, name="income"),
-    path('budget/', views.budget_setup, name="budget"),
-    path('details/', views.details, name="details"),
-    path('idelete/<int:id>', views.deleteI, name="idelete"),
-    path('gdelete/<int:id>', views.deleteG, name="gdelete"),
-    path('details/didelete/<int:id>', views.delete_DI, name="didelete"),
-    path('details/dbdelete/<int:id>', views.delete_DG, name="dbdelete"),
-    path('status/', views.status, name="status"),
-    path('expence/', views.daily_expences, name="expence")
+    path('', views.StatusLsit.as_view(), name="M-list"),
+    path('createb/', views.CreateBudeget.as_view(), name="create-b"),
+    path('createm/', views.CreateMoney.as_view(), name="create-m"),
+    path('delete/<str:model_name>/<int:pk>', views.ObjDelete.as_view(), name="delete"),
+    path('detail/<str:model_name>/<int:pk>', views.Details.as_view(), name="detail"),
+    path('update/<str:model_name>/<int:pk>', views.Update.as_view(), name="update"),
 ]

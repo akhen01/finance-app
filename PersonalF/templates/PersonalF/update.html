@@ -1,0 +1,20 @@
+{% extends 'PersonalF/base.html'%}
+
+{% block body%}
+<a href="{% url 'M-list' %}" style="margin: 3rem; padding: 0rem 2rem;"><h3>Back</h3></a>
+
+<div class="body">
+    <div class="flex__center app__bg section__padding" style="width: 100%;">
+        <div class="subbody flex__center">
+
+            <h1>Update View {{obj}}</h1>
+
+            <form method="POST" action="">
+                {%csrf_token%}
+                {{form.as_p}}
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

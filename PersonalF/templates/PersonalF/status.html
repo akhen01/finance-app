@@ -1,48 +1,90 @@
 {% extends 'PersonalF/base.html'%}
 
 {% block body%}
-<h1>Financial status</h1>
-<h2>MY Incomes</h2>
-<ul>
-    {% for Dinc in allincomes %}
-    <h3>{{Dinc.Itype}}</h3>
-    <li>
-        {{Dinc.amount}}
-    </li>
-    {% empty %}
-    <li>
-        No Income
-    </li>
-    {% endfor %}
-</ul>
-<h3>Total Income : {{Totalincome}}</h3>  
+    <div class="flex__end ">
+    {% if request.user.is_authenticated %}
+    <h3>Profile Name: {{ request.user.username }}</h3>
+    <p><a href="{% url 'logout' %}">Logout</a></p>
+    {% else %}
+    <p><a href="{% url 'login' %}">Login</a></p>
+    {% endif %}
+    </div>
+    <div class="body">
 
-<h2>My Budgets</h2>
-<ul>
-    {% for Dbud in allbudgets %}
-    <h3>{{Dbud.Itype}}</h3>
-    <li>
-        {{Dbud.amount}}
-        <ul>
-            <li>
-                <h4>Expences so far</h4>
-            </li>            
-            
-        </ul>
-    </li>
-    {% empty %}
-    <li>
-        No Budgets
-    </li>
-    {% endfor %}
-    <li>{{Alist}}</li>
-    <ul>
-        {% for key, value in Alist.items %}
-        <li>{{key}} - {{value}}</li>
-        {% endfor %}
-        <li>{{L}}</li>
-    </ul>
-    
-</ul>
-<a href="{% url 'expence' %} ">Insert Expence</a>
+        <h1>Budget Finance</h1>
+
+        <div class="app__wrapper_info flex__center app__bg section__padding">
+            <div class="flex__center">
+                <ul>
+                    <div class="subbody">
+                    <table>
+                        <th><h3>Income</h3></th>
+                        {% for inc in income %}
+                        <tr>
+                            <td> <p>{{ inc.discription }}</p> </td>
+                            <td> <p>{{ inc.amount }}</p> </td>
+                            <td><a href="{% url 'delete' model_name='Money' pk=inc.id  %}">Delete</a></td>
+                            <td><a href="{% url 'detail' model_name='Money' pk=inc.id  %}">View</a></td>
+                            <td><a href="{% url 'update' model_name='Money' pk=inc.id  %}">Update</a></td>
+                        </tr>
+                        {% empty %}
+                        <td><p>no Income</p></td>
+                        {% endfor%}
+                        <tr>
+                            <td><h3>Total Income</h3></td>
+                            <td><h3>{{totalincome}}</h3></td>
+                        </tr>
+                    </table>
+                    <table>
+                        <th><h3>Expence</h3></th>
+                        {% for inc in expence %}
+                        <tr>
+                            <td> <p>{{ inc.discription }}</p> </td>
+                            <td> <p>{{ inc.amount }}</p> </td>
+                            <td><a href="{% url 'delete' model_name='Money' pk=inc.id  %}">Delete</a></td>
+                            <td><a href="{% url 'detail' model_name='Money' pk=inc.id  %}">View</a></td>
+                            <td><a href="{% url 'update' model_name='Money' pk=inc.id  %}">Update</a></td>
+                        </tr>
+                        {% empty %}
+                        <td><p> no Expence</p></td>
+                        {% endfor%}                        
+                    </table>
+                </div>
+                <div class="subbody">
+                    <table>
+                        <th><h3>Budgets</h3></th>
+                        {% for bul in budget %}
+                        <tr>
+                            <td> <p>{{ bul.budget_type }}</p> </td>
+                            <td> <p>{{ bul.amount }}</p> </td>
+                            <td><a href="{% url 'delete' model_name='Budget' pk=bul.id  %}">Delete</a></td>
+                            <td><a href="{% url 'detail' model_name='Budget' pk=bul.id  %}">View</a></td>
+                            <td><a href="{% url 'update' model_name='Budget' pk=bul.id  %}">Update</a></td>
+                        </tr>
+                        {% empty %}
+                        <td><p>no Budget</p></td>
+                        {% endfor%}
+                    </table>
+                </div>
+                </ul>
+            </div>
+
+        </div>
+        <div class="flex__center wrapp_column">
+            <div class="subbody">
+                <h3>Register Budget</h3>
+                <div class="app__wrapper_info">
+                <p>Here you can Register any budget you have alocated for the month. The more detailed the better to keep track.</p>
+                </div>
+                <p><a href="{% url 'create-b' %}">Create Budget</a></p>
+            </div>
+            <div class="subbody">
+                <h3>Register Income/Expence</h3>
+                <div class="app__wrapper_info">
+                <p>Here you can Register any incomes and expences you have by catagorizing in the forms. The more detailed the better to keep track.</p>
+                </div>
+                <p><a href="{% url 'create-m' %}">Register Income/Expence</a></p>
+            </div>
+        </div>
+    </div>
 {% endblock %}

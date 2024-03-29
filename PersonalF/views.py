@@ -1,128 +1,156 @@
-from django.shortcuts import render, redirect
-from .form import *
-from .models import *
-# Create your views here.
+from django.db.models.base import Model as Model
+from .models import Money, Budget
+from django.urls import reverse_lazy
+from django.http import HttpResponseRedirect
 
-def index(request):
-    return render(request, "PersonalF/index.html")
+from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
+from .forms import moneyForm, budgetForm
 
-def income_setup(request):
-    income_type = incometype.objects.all()
-    Itype_form = incomeT_registry()
+from django.http import Http404
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-    if request.method == "POST":
-        form1 = incomeT_registry(request.POST)
-        if form1.is_valid():
-            form1.save()
-    return render(request, "PersonalF/income.html", 
-                {"income": Itype_form, 
-                "inlist": income_type,
-                })
+from datetime import datetime
 
+class ObjDelete(LoginRequiredMixin, DeleteView):
+    template_name = "PersonalF/object_delete.html"
+    success_url = reverse_lazy("M-list")
 
-def budget_setup(request):
-    budget_type = budgettype.objects.all()
-    Btype_form = budgetT_registry()
+    def get_object(self, queryset=None):
+        model_name = self.kwargs.get('model_name')
+        pk = self.kwargs.get("pk")
 
-    if request.method == "POST":
-        form2 = budgetT_registry(request.POST)
-        if form2.is_valid():
-            form2.save()
-    return render(request, "PersonalF/budget.html", {
-                "budget":Btype_form,   
-                "bulist": budget_type
-                })
+        model_mapping = {
+            "Money":Money, 
+            "Budget":Budget
+        }
 
-def details(request):
-    incomes_list = income.objects.all()
-    budget_list = budget.objects.all()
-
-    Income = income_registry()
-    Budget = budget_registry()
-    if request.method == "POST":
-        detail_income = income_registry(request.POST)
-        if detail_income.is_valid():
-            detail_income.save()
-
-    if request.method == "POST":
-        detail_budget = budget_registry(request.POST)
-        if detail_budget.is_valid():
-            detail_budget.save()
-        
-    return render(request, "PersonalF/details.html",{
-        "income":Income,
-        "budget":Budget,
-        "allincomes":incomes_list,
-        "allbudgets":budget_list
-    })
-
-
-# deleting the income types and budget types
-
-def deleteI(request, id):
-    itype = incometype.objects.get(pk=id)
-    itype.delete()
-
-    return redirect('income')
-
-def deleteG(request, id):
-    gtype = budgettype.objects.get(pk=id)
-    gtype.delete()
-
-    return redirect('budget')
-
-
-# deleting the details of income and budgets
-def delete_DI(request, id):
-    itype = income.objects.get(pk=id)
-    itype.delete()
-
-    return redirect('details')
-
-def delete_DG(request, id):
-    gtype = budget.objects.get(pk=id)
-    gtype.delete()
-
-    return redirect('details')
-
-def status(request):
-
-    expence_list = expence.objects.all()
-    incomes_list = income.objects.all()
-    budget_list = budget.objects.all()
-    budgets = budgettype.objects.all()
-    total_income = sum([i.amount for i in incomes_list])
-    Alist = {}
-    for i in budget_list:
-        blist=[]
-        for j in expence_list:
-            if i.Itype == j.Itype:
-                blist.append(j.amount)
-        Alist[str(i.Itype)] = blist
+        model_class = model_mapping.get(model_name)
+        obj = model_class.objects.get(pk=pk)
+        if obj.owner != self.request.user:
+            raise Http404("You do not have permission to view this object.")
+        return obj
     
-    list1 = []
-    for value in Alist.values():
-        list1.append(sum(value))
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        obj.delete()
+        return super().objDelete(request, *args, **kwargs)
+    
+
+class CreateBudeget(LoginRequiredMixin, CreateView):
+    model = Budget
+    form_class = budgetForm
+    template_name = "PersonalF/createall.html"
+    success_url = reverse_lazy("M-list")
+
+    def form_valid(self, form):
+        # Assign the currently logged-in user to the object
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+    
+    
+class CreateMoney(LoginRequiredMixin, CreateView):
+    model = Money
+    form_class = moneyForm
+    template_name = "PersonalF/createall.html"
+    success_url = reverse_lazy("M-list")
+
+    def form_valid(self, form):
+        # Assign the currently logged-in user to the object
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
-            
-    return render(request, "PersonalF/status.html",{
-        "allincomes":incomes_list,
-        "allbudgets":budget_list,
-        "Totalincome":total_income,
-        "Alist":Alist,
-        "L":list1
-    })
+class StatusLsit(LoginRequiredMixin, ListView):
+    model = Budget
+    template_name = "PersonalF/status.html"
 
-def daily_expences(request):
-    today = today_expences_form()
-    allExpences = expence.objects.all()
-    if request.method == "POST":
-        today_expence = today_expences_form(request.POST)
-        if today_expence.is_valid():
-            today_expence.save()
-    return render(request, "PersonalF/daily_expences.html",{
-        "Eform":today,
-        "allExpences":allExpences
-    })
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        current_month = datetime.now().month
+        income = Money.objects.filter(owner=self.request.user).filter(Mtype="income").filter(date__month=current_month)
+        expence = Money.objects.filter(owner=self.request.user).filter(Mtype="expence").filter(date__month=current_month)
+        total_income = sum([i.amount for i in income])
+        context["income"] = income
+        context["expence"] = expence
+        context["totalincome"] = total_income
+
+        context["budget"] = Budget.objects.filter(owner=self.request.user).filter(for_month__month=current_month)
+
+        return context
+    
+class Details(LoginRequiredMixin, DetailView):
+    template_name = "PersonalF/details.html"
+
+    def get_object(self, queryset=None):
+        model_name = self.kwargs.get('model_name')
+        pk = self.kwargs.get("pk")
+
+        model_mapping = {
+            "Money":Money, 
+            "Budget":Budget
+        }
+
+        model_class = model_mapping.get(model_name)
+        obj = model_class.objects.get(pk=pk)
+        if obj.owner != self.request.user:
+            raise Http404("You do not have permission to view this object.")
+        return obj
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        obj = self.get_object()
+        context["object"] = self.get_object()
+        return context
+    
+class Update(LoginRequiredMixin, UpdateView):
+    model = Money
+    fields = "__all__"
+    template_name = "PersonalF/update.html"
+    success_url = reverse_lazy("M-list")
+
+    def get_object(self, queryset=None):
+        model_name = self.kwargs.get('model_name')
+        pk = self.kwargs.get("pk")
+
+        model_mapping = {
+            "Money":Money, 
+            "Budget":Budget
+        }
+
+        model_class = model_mapping.get(model_name)
+        obj = model_class.objects.get(pk=pk)
+        if obj.owner != self.request.user:
+            raise Http404("You do not have permission to view this object.")
+        return obj
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        model_name = self.kwargs.get('model_name')
+        model_mapping = {
+            "Money":moneyForm, 
+            "Budget":budgetForm
+        }
+        obj = self.get_object()
+        my_class = model_mapping.get(model_name)
+        context["object"] = obj
+        context["form"] = my_class(instance = obj)
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        model_name = self.kwargs.get('model_name')
+        model_mapping = {
+            "Money":moneyForm, 
+            "Budget":budgetForm
+        }
+        self.form_class = model_mapping.get(model_name)
+        self.object = self.get_object()
+        form = self.form_class(request.POST, instance = self.object)
+        if form.is_valid():
+            update = form.save()
+            return HttpResponseRedirect(self.get_success_url())
+        else:
+            return self.render_to_response(
+              self.get_context_data(form=form))

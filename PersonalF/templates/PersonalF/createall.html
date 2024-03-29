@@ -1,0 +1,22 @@
+{% extends "PersonalF/base.html" %}
+<h1>Daily expences</h1>
+
+{% block body %}
+<a href="{% url 'M-list' %}" style="margin: 3rem; padding: 0rem 2rem;"><h3>Back</h3></a>
+<div class="body">
+    <div class="flex__center app__bg section__padding" style="width: 100%;">
+        <div class="subbody flex__center">
+            <h1>Create</h1>
+            <form method="POST" action="">
+                {% csrf_token %}
+                {{form.as_p}}
+                {% if form.Mtype.value != "income"%}
+                {{ form.catagory_name.as_hidden }}
+                {% endif %}
+                <input type="submit" value="Save">
+            </form>
+        </div>
+    </div>
+</div>
+   
+{% endblock %}

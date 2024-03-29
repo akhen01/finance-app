@@ -1,0 +1,28 @@
+{% extends 'PersonalF/base.html'%}
+
+{% block body%}
+{% load static %}
+
+<div class="body">
+    <h1>Welcome to personal finance concept</h1>
+<div class="flex__center app__bg section__padding" style="width: 100%;">
+    <div class="subbody flex__center">
+        <h1 style="margin-bottom: 3rem ;">Login</h1>
+        <form method="POST" action="">
+            {% csrf_token %}
+            {{form.as_p}}
+            {% if form.password2 %}
+            <input style="margin-top: 3rem;" class="a" type="submit" value="Register">
+            {% else %}
+            <input style="margin-top: 3rem;" class="a" type="submit" value="Login">
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% if form.password2 %}
+<p>Have an account <a href="{% url 'login' %}">Login?</a></p>
+{% else %}
+<p>don't have an account <a href="{% url 'register' %}">register?</a> </p>
+</div>
+{% endif %}
+{% endblock %}

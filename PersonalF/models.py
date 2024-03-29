@@ -1,44 +1,49 @@
 from django.db import models
 
+from django.contrib.auth.models import User
+from django.utils import timezone
+from datetime import datetime
+
 #from django.contrib.auth.models import User
 
 # Create your models here.
-class incometype(models.Model):
-    name = models.CharField(max_length= 64)
 
-    def __str__(self):
-        return self.name
+Cnames = [
+        ("Fun" ,"Fun" ),                    # includes drinking, eating, dates, nightout
+        ("Apparel", "Apparel"),             # clothes, shoes, glasses, jewelry and other warable products
+        ("Grocery", "Grocery"),             # eatable products
+        ("Cleaning", "Cleaning"),           # products used for cleaning
+        ("Electronics", "Electronics"),     # laptops, phones etc..
+        ("Furniture", "Furniture"),         # beds, sofas etc...
+        ("Rent", "Rent"),
+        ("Bills", "Bills")
+    ]
     
-class budgettype(models.Model):
-    name = models.CharField(max_length= 64)
-
-    def __str__(self):
-        return self.name
+class Money(models.Model):
+    types = [
+        ("income","income"),
+        ("expence", "expence")
+    ]
     
-class income(models.Model):
-    amount = models.IntegerField()
-    date = models.DateField(auto_now_add=True)
-    Itype = models.ForeignKey(incometype, on_delete=models.CASCADE)
-    #made_by = models.ForeignKey(User, on_delete=models.CASCADE)
-
-class budget(models.Model):
-    amount = models.IntegerField()
-    date = models.DateField(auto_now_add=True)
-    Itype = models.ForeignKey(budgettype, on_delete=models.CASCADE)
-    #made_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    
-    def total(self):
-        return sum(i for i in self.amount.all())
-
-class expence(models.Model):
-    amount = models.IntegerField()
-    Itype = models.ForeignKey(budgettype, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User,on_delete=models.CASCADE)
+    discription = models.CharField(max_length=50, blank=False, null=False)
+    Mtype = models.CharField(max_length=50, choices=types, blank=False, null=False)
+    catagory_name = models.CharField(max_length=50, choices=Cnames, default="Rent", blank=True, null=True)
+    amount = models.IntegerField(blank=False, null=False)
     date = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return self.Itype
+        return self.discription
 
-    def total(self):
-        return sum(i for i in self.amount.all())
+class Budget(models.Model):
+    owner = models.ForeignKey(User, default=1, on_delete=models.CASCADE)
+    amount = models.IntegerField()
+    date = models.DateField(auto_now_add=True)
+    budget_type = models.CharField(max_length=50, choices=Cnames, default="Rent", blank=False, null=False)
+    for_month = models.DateField(default=timezone.now(), blank=False, null=False)
+
+    def __str__(self):
+        return self.budget_type
 
 
+# need to include all the data in one model 
